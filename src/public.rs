@@ -135,6 +135,19 @@ impl KeybdKey {
             .unwrap()
             .insert(self, Bind::BlockableBind(Arc::new(callback)));
     }
+    
+    pub fn bind_all<F: Fn(KeybdKey) + Send + Sync + Copy + 'static>(callback: F) {
+        for key in KeybdKey::iter() {
+            let fire = move || {
+                callback(key);
+            };
+
+            KEYBD_BINDS
+                .lock()
+                .unwrap()
+                .insert(key, Bind::NormalBind(Arc::new(fire)));
+        }
+    }
 
     pub fn unbind(self) {
         KEYBD_BINDS.lock().unwrap().remove(&self);
